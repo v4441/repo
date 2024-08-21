@@ -1,5 +1,5 @@
 ---
-"@hyperlane-xyz/core": minor
+'@hyperlane-xyz/core': minor
 ---
 
 feat: attributable fraud for signers
