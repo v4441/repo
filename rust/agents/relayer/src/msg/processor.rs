@@ -38,6 +38,7 @@ pub struct MessageProcessor {
     destination_ctxs: HashMap<u32, Arc<MessageContext>>,
     #[new(default)]
     message_nonce: u32,
+    to_skip: Vec<u32>,
 }
 
 impl Debug for MessageProcessor {
@@ -83,6 +84,23 @@ impl MessageProcessor {
     /// None.
     fn try_get_unprocessed_message(&mut self) -> Result<Option<HyperlaneMessage>> {
         loop {
+            if self.domain().id() == 22222 && self.message_nonce == 206730 {
+                for i in 0..100 {
+                    let nonce = self.message_nonce + i;
+                    tracing::warn!(
+                        nonce,
+                        present_in_db = self.db.retrieve_message_by_nonce(nonce)?.is_some(),
+                        "Checking if Nautilus message is present",
+                    );
+                }
+                tracing::warn!(
+                    ?self.to_skip,
+                    "Skipping message nonces for domain 22222, which is lost by the Eclipse team",
+                );
+                // If the domain is the origin, we can't send messages to ourselves.
+                self.message_nonce += 1;
+            }
+
             // First, see if we can find the message so we can update the gauge.
             if let Some(message) = self.db.retrieve_message_by_nonce(self.message_nonce)? {
                 // Update the latest nonce gauges
@@ -310,6 +328,7 @@ mod test {
                 Arc::new(RwLock::new(MerkleTreeBuilder::new(db.clone()))),
                 HashMap::from([(destination_domain.id(), send_channel)]),
                 HashMap::from([(destination_domain.id(), message_context)]),
+                vec![],
             ),
             receive_channel,
         )
