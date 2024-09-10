@@ -38,3 +38,5 @@ tarpc = "~0.29"
 [lib]
 crate-type = ["cdylib", "lib"]
 
+[profile.release]
+overflow-checks = true
