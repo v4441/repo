@@ -13,7 +13,6 @@ use ethers::prelude::Middleware;
 use ethers_contract::builders::ContractCall;
 use ethers_contract::{Multicall, MulticallResult};
 use futures_util::future::join_all;
-use hyperlane_core::rpc_clients::call_and_retry_indefinitely;
 use hyperlane_core::{BatchResult, QueueOperation, H512};
 use itertools::Itertools;
 use tracing::instrument;
@@ -35,7 +34,7 @@ use crate::tx::{call_with_lag, fill_tx_gas_params, report_tx};
 use crate::{BuildableWithProvider, ConnectionConf, EthereumProvider, TransactionOverrides};
 
 use super::multicall::{self, build_multicall};
-use super::utils::fetch_raw_logs_and_meta;
+use super::utils::fetch_raw_logs_and_log_meta;
 
 impl<M> std::fmt::Display for EthereumMailboxInternal<M>
 where
@@ -171,23 +170,20 @@ where
         &self,
         tx_hash: H512,
     ) -> ChainResult<Vec<(Indexed<HyperlaneMessage>, LogMeta)>> {
-        let raw_logs_and_meta = call_and_retry_indefinitely(|| {
-            let provider = self.provider.clone();
-            let contract = self.contract.address();
-            Box::pin(async move {
-                fetch_raw_logs_and_meta::<DispatchFilter, M>(tx_hash, provider, contract).await
-            })
+        let logs = fetch_raw_logs_and_log_meta::<DispatchFilter, M>(
+            tx_hash,
+            self.provider.clone(),
+            self.contract.address(),
+        )
+        .await?
+        .into_iter()
+        .map(|(log, log_meta)| {
+            (
+                HyperlaneMessage::from(log.message.to_vec()).into(),
+                log_meta,
+            )
         })
-        .await;
-        let logs = raw_logs_and_meta
-            .into_iter()
-            .map(|(log, log_meta)| {
-                (
-                    HyperlaneMessage::from(log.message.to_vec()).into(),
-                    log_meta,
-                )
-            })
-            .collect();
+        .collect();
         Ok(logs)
     }
 }
@@ -228,7 +224,7 @@ where
             .query_with_meta()
             .await?
             .into_iter()
-            .map(|(event, meta)| (Indexed::new(H256::from(event.message_id)), meta.into()))
+            .map(|(event, meta)| (H256::from(event.message_id).into(), meta.into()))
             .collect())
     }
 }

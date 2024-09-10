@@ -28,7 +28,7 @@ pub const CONFIRM_DELAY: Duration = if cfg!(any(test, feature = "test-utils")) {
     Duration::from_secs(5)
 } else {
     // Wait 1 min after submitting the message before confirming in normal/production mode
-    Duration::from_secs(60 * 10)
+    Duration::from_secs(60)
 };
 
 /// The message context contains the links needed to submit a message. Each
@@ -170,7 +170,7 @@ impl PendingOperation for PendingMessage {
         self.app_context.clone()
     }
 
-    #[instrument(skip(self), fields(id=?self.id()), level = "debug")]
+    #[instrument(skip(self), ret, fields(id=?self.id()), level = "debug")]
     async fn prepare(&mut self) -> PendingOperationResult {
         if !self.is_ready() {
             trace!("Message is not ready to be submitted yet");

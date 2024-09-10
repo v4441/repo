@@ -146,7 +146,7 @@ const hyperlane: RootAgentConfig = {
     rpcConsensusType: RpcConsensusType.Fallback,
     docker: {
       repo,
-      tag: 'd0ce062-20240813-215255',
+      tag: '874a58f-20240812-172417',
     },
     blacklist: [
       ...releaseCandidateHelloworldMatchingList,
@@ -176,7 +176,7 @@ const hyperlane: RootAgentConfig = {
     rpcConsensusType: RpcConsensusType.Fallback,
     docker: {
       repo,
-      tag: 'd0ce062-20240813-215255',
+      tag: '874a58f-20240812-172417',
     },
     chains: validatorChainConfig(Contexts.Hyperlane),
     resources: validatorResources,
@@ -185,7 +185,7 @@ const hyperlane: RootAgentConfig = {
     rpcConsensusType: RpcConsensusType.Fallback,
     docker: {
       repo,
-      tag: 'd0ce062-20240813-215255',
+      tag: '874a58f-20240812-172417',
     },
     resources: scraperResources,
   },

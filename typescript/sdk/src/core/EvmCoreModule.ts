@@ -157,8 +157,6 @@ export class EvmCoreModule extends HyperlaneModule<
       staticAggregationHookFactory,
       staticMessageIdMultisigIsmFactory,
       staticMerkleRootMultisigIsmFactory,
-      staticMerkleRootWeightedMultisigIsmFactory,
-      staticMessageIdWeightedMultisigIsmFactory,
     } = this.serialize();
 
     const ismModule = new EvmIsmModule(this.multiProvider, {
@@ -171,8 +169,6 @@ export class EvmCoreModule extends HyperlaneModule<
         staticAggregationHookFactory,
         staticMessageIdMultisigIsmFactory,
         staticMerkleRootMultisigIsmFactory,
-        staticMerkleRootWeightedMultisigIsmFactory,
-        staticMessageIdWeightedMultisigIsmFactory,
         deployedIsm: actualDefaultIsmConfig.address,
       },
     });

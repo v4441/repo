@@ -29,7 +29,6 @@ pub(crate) struct Context {
     pub require_tx_approval: bool,
 }
 
-#[derive(Debug)]
 pub(crate) struct InstructionWithDescription {
     pub instruction: Instruction,
     pub description: Option<String>,

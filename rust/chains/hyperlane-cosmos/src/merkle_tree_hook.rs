@@ -11,7 +11,6 @@ use once_cell::sync::Lazy;
 use tendermint::abci::EventAttribute;
 use tracing::instrument;
 
-use crate::utils::parse_logs_in_range;
 use crate::{
     grpc::WasmProvider,
     payloads::{general, merkle_tree_hook},
@@ -284,12 +283,22 @@ impl Indexer<MerkleTreeInsertion> for CosmosMerkleTreeHookIndexer {
         &self,
         range: RangeInclusive<u32>,
     ) -> ChainResult<Vec<(Indexed<MerkleTreeInsertion>, LogMeta)>> {
-        let logs_futures = parse_logs_in_range(
-            range,
-            self.indexer.clone(),
-            Self::merkle_tree_insertion_parser,
-            "MerkleTreeInsertionCursor",
-        );
+        let logs_futures: Vec<_> = range
+            .map(|block_number| {
+                let self_clone = self.clone();
+                tokio::spawn(async move {
+                    let logs = self_clone
+                        .indexer
+                        .get_logs_in_block(
+                            block_number,
+                            Self::merkle_tree_insertion_parser,
+                            "MerkleTreeInsertionCursor",
+                        )
+                        .await;
+                    (logs, block_number)
+                })
+            })
+            .collect();
 
         execute_and_parse_log_futures(logs_futures).await
     }
