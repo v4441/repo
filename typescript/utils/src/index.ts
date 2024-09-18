@@ -50,6 +50,7 @@ export {
 export { chunk, exclude, randomElement } from './arrays.js';
 export {
   concurrentMap,
+  fetchWithTimeout,
   pollAsync,
   raceWithContext,
   retryAsync,
@@ -109,6 +110,7 @@ export {
   objMap,
   objMapEntries,
   objMerge,
+  objSlice,
   pick,
   promiseObjAll,
   stringifyObject,
@@ -151,6 +153,6 @@ export {
   TokenCaip19Id,
   WithAddress,
 } from './types.js';
-export { isHttpsUrl } from './url.js';
+export { isHttpsUrl, isUrl } from './url.js';
 export { assert } from './validation.js';
 export { BaseValidator, ValidatorConfig } from './validator.js';
