@@ -52,7 +52,7 @@ abstract contract AbstractMessageIdAuthorizedIsm is
     // ============ Events ============
 
     /// @notice Emitted when a message is received from the external bridge
-    event ReceivedMessage(bytes32 indexed messageId);
+    event ReceivedMessage(bytes32 indexed messageId, uint256 msgValue);
 
     // ============ Initializer ============
 
@@ -114,7 +114,10 @@ abstract contract AbstractMessageIdAuthorizedIsm is
      * @dev Only callable by the authorized hook.
      * @param messageId Hyperlane Id of the message.
      */
-    function verifyMessageId(bytes32 messageId) public payable virtual {
+    function verifyMessageId(
+        bytes32 messageId,
+        uint256 msgValue
+    ) public payable virtual {
         require(
             _isAuthorized(),
             "AbstractMessageIdAuthorizedIsm: sender is not the hook"
@@ -123,9 +126,17 @@ abstract contract AbstractMessageIdAuthorizedIsm is
             msg.value < 2 ** VERIFIED_MASK_INDEX,
             "AbstractMessageIdAuthorizedIsm: msg.value must be less than 2^255"
         );
+        require(
+            msg.value == msgValue,
+            "AbstractMessageIdAuthorizedIsm: msg.value doesn't match"
+        );
+
+        if (verifiedMessages[messageId] != 0) {
+            return;
+        }
 
         verifiedMessages[messageId] = msg.value.setBit(VERIFIED_MASK_INDEX);
-        emit ReceivedMessage(messageId);
+        emit ReceivedMessage(messageId, msgValue);
     }
 
     // ============ Internal Functions ============
