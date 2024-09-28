@@ -1,6 +1,18 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity >=0.6.11;
 
+/*@@@@@@@       @@@@@@@@@
+ @@@@@@@@@       @@@@@@@@@
+  @@@@@@@@@       @@@@@@@@@
+   @@@@@@@@@       @@@@@@@@@
+    @@@@@@@@@@@@@@@@@@@@@@@@@
+     @@@@@  HYPERLANE  @@@@@@@
+    @@@@@@@@@@@@@@@@@@@@@@@@@
+   @@@@@@@@@       @@@@@@@@@
+  @@@@@@@@@       @@@@@@@@@
+ @@@@@@@@@       @@@@@@@@@
+@@@@@@@@@       @@@@@@@@*/
+
 // ============ Internal Imports ============
 import {IMailbox} from "../interfaces/IMailbox.sol";
 import {IPostDispatchHook} from "../interfaces/hooks/IPostDispatchHook.sol";
@@ -13,6 +25,9 @@ import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/Own
 
 abstract contract MailboxClient is OwnableUpgradeable {
     using Message for bytes;
+
+    event HookSet(address _hook);
+    event IsmSet(address _ism);
 
     IMailbox public immutable mailbox;
 
@@ -62,8 +77,11 @@ abstract contract MailboxClient is OwnableUpgradeable {
      * @notice Sets the address of the application's custom hook.
      * @param _hook The address of the hook contract.
      */
-    function setHook(address _hook) public onlyContractOrNull(_hook) onlyOwner {
+    function setHook(
+        address _hook
+    ) public virtual onlyContractOrNull(_hook) onlyOwner {
         hook = IPostDispatchHook(_hook);
+        emit HookSet(_hook);
     }
 
     /**
@@ -74,6 +92,7 @@ abstract contract MailboxClient is OwnableUpgradeable {
         address _module
     ) public onlyContractOrNull(_module) onlyOwner {
         interchainSecurityModule = IInterchainSecurityModule(_module);
+        emit IsmSet(_module);
     }
 
     // ======== Initializer =========
